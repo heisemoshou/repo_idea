@@ -35,4 +35,11 @@ public interface UserMapper {
     
     public List<Resource> findResourceByRoleId2(List<Integer> ids);
 
+    public void te2t1();
+    public void te3t2();
+    public void te4t3();
+    public void te54();
+    public void t5t5();
+    public void t6st6();
+    public void te6st7();
 }
