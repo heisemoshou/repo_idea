@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lagou.dao.RoleMapper">
+
+    <!--查询所有角色（条件）-->
+    <select id="findAllRole" parameterType="Role" resultType="Role">
+        select * from roles
+        <where>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据角色id查询关联的菜单信息id -->
+    <select id="findMenuByRoleId" resultType="int" parameterType="int">
+        SELECT
+          m.`id`
+        FROM
+          roles r
+          INNER JOIN role_menu_relation rm
+            ON r.`id` = rm.`role_id`
+          INNER JOIN menu m
+            ON m.`id` = rm.`menu_id`
+        WHERE r.`id` = #{id}
+    </select>
+
+    <!-- 根据roleId清空中间表的关联关系 -->
+    <delete id="deleteRoleContextMenu" parameterType="int">
+        delete from role_menu_relation where role_id = #{rid}
+    </delete>
+
+    <!-- 为角色分配菜单信息 -->
+    <insert id="roleContextMenu" parameterType="Role_menu_relation">
+        INSERT INTO role_menu_relation
+        VALUES
+          (NULL,#{menuId},#{roleId},#{createdTime},
+          #{updatedTime},#{createdBy},#{updatedby})
+    </insert>
+
+    <!-- 删除角色 -->
+    <delete id="deleteRole" parameterType="int">
+        delete from roles where id = #{roleId}
+    </delete>
+
+    <!-- 查询当前角色拥有的资源分类信息 -->
+    <select id="findResourceCategoryListByRoleId" parameterType="int" resultType="ResourceCategory">
+        <!-- 由于没有资源分类表与角色表的中间表,
+             所以需要根据角色表关联的资源信息找到其对应的资源分类信息 -->
+        SELECT DISTINCT
+            rc.id,
+            rc.name
+        FROM
+            resource_category rc
+            INNER JOIN resource re
+                ON re.category_id = rc.id
+            INNER JOIN role_resource_relation rr
+                ON rr.resource_id = re.id
+        WHERE rr.role_id = #{roleId};
+    </select>
+
+    <!-- 查询当前角色拥有的资源信息 -->
+    <select id="findSubResourceByCategoryId" resultType="Resource">
+        SELECT
+          id,NAME,url,category_id,description
+        FROM
+          resource
+        WHERE id IN
+          (SELECT
+            resource_id
+          FROM
+            role_resource_relation
+          WHERE role_id = #{roleId})
+          AND category_id = #{categoryId}
+    </select>
+
+    <!-- 根据角色ID 删除角色与资源的关联关系 -->
+    <delete id="deleteResourceByRoleId" parameterType="int">
+        delete from role_resource_relation where role_id = #{roleId}
+    </delete>
+
+    <!-- 为角色分配资源, 删除完成后 ,插入最新的关联关系 -->
+    <insert id="roleContextResource" parameterType="RoleResourceRelation">
+        INSERT INTO role_resource_relation
+        VALUES
+          (NULL,
+          #{resourceId},#{roleId},
+          #{createdTime},#{updatedTime},
+          #{createdBy},#{updatedBy})
+    </insert>
+</mapper>

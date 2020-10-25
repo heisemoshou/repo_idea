@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lagou.dao.ResourceCategoryMapper">
+
+    <!-- 查询所有资源分类 -->
+    <select id="findAllResourceCategory" resultType="ResourceCategory">
+        select * from resource_category
+    </select>
+
+    <!-- 新增资源分类 -->
+    <insert id="saveResourceCategory" parameterType="ResourceCategory">
+        INSERT INTO resource_category
+        VALUES
+          (NULL,#{name},#{sort},#{createdTime},
+          #{updatedTime},#{createdBy},#{updatedBy})
+    </insert>
+
+    <!-- 更新资源分类信息 -->
+    <update id="updateResourceCategory" parameterType="ResourceCategory">
+        UPDATE
+          resource_category
+        SET
+          name = #{name},sort = #{sort},
+           updated_time = #{updatedTime},updated_by = #{updatedBy} where id = #{id}
+    </update>
+
+    <!-- 根据id删除资源分类 -->
+    <delete id="deleteResourceCategory" parameterType="int">
+        delete from resource_category where id = #{id}
+    </delete>
+</mapper>
